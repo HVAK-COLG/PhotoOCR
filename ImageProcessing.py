@@ -14,15 +14,6 @@ def noise(image):
     mask = cv2.morphologyEx(img_bw, cv2.MORPH_CLOSE, se1)
     mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, se1)
 
-    se2 = cv2.getStructuringElement(cv2.MORPH_RECT, (14, 14))
-    mask2 = cv2.morphologyEx(img_bw, cv2.MORPH_CLOSE, se2)
-    mask2 = cv2.morphologyEx(mask2, cv2.MORPH_OPEN, se1)
-
-    r, c = image.shape
-
-    out1 = cv2.bitwise_and(image, image, mask=mask)
-    out2 = cv2.bitwise_and(image, image, mask=mask2)
-    out = out1 - out2
     return mask
 
 
