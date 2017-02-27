@@ -9,7 +9,6 @@ import copy
 img = Image.open("Sample1.jpg")
 w, h = img.size
 ar = w / h
-print(ar)
 if ar > 1:
     img = img.resize((1080, (int)(1080 / ar)), Image.ANTIALIAS)
 else:
@@ -25,7 +24,7 @@ grayDisp = copy.deepcopy(gray)
 noise = ImageProcessing.noise(gray)
 noiseDisp = copy.deepcopy(noise)
 
-binary = ImageProcessing.binary(gray)
+binary = ImageProcessing.binary(noise)
 binaryDisp = copy.deepcopy(binary)
 
 inv = ImageProcessing.invert(binary)
@@ -41,7 +40,7 @@ for contour in contours:
     [x, y, w, h] = cv2.boundingRect(contour)
 
     # Avoiding false trues , lesser than 50x50 size
-    if w < 100 and h < 100:
+    if w < 20 and h < 20:
         continue
 
     # drawing bounding box on original input image

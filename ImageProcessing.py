@@ -10,14 +10,20 @@ brightness = 1.5
 
 def noise(image):
     img_bw = 255 * (image > 5).astype('uint8')
-    se1 = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))
-    se2 = cv2.getStructuringElement(cv2.MORPH_RECT, (2, 2))
+    se1 = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
     mask = cv2.morphologyEx(img_bw, cv2.MORPH_CLOSE, se1)
-    mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, se2)
+    mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, se1)
 
-    out = image * mask
+    se2 = cv2.getStructuringElement(cv2.MORPH_RECT, (14, 14))
+    mask2 = cv2.morphologyEx(img_bw, cv2.MORPH_CLOSE, se2)
+    mask2 = cv2.morphologyEx(mask2, cv2.MORPH_OPEN, se1)
 
-    return out
+    r, c = image.shape
+
+    out1 = cv2.bitwise_and(image, image, mask=mask)
+    out2 = cv2.bitwise_and(image, image, mask=mask2)
+    out = out1 - out2
+    return mask
 
 
 def invert(image):
@@ -60,6 +66,6 @@ def binary(img):
 
 def textarea(image):
     kernel = cv2.getStructuringElement(cv2.MORPH_CROSS, (3, 3))
-    dilated = cv2.dilate(image, kernel, iterations=8)
+    dilated = cv2.dilate(image, kernel, iterations=10)
     img, contours, hierarchy = cv2.findContours(dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     return contours
