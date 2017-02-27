@@ -1,9 +1,6 @@
 import cv2
 import numpy as np
-from functools import reduce
-import math
 from PIL import Image, ImageEnhance
-from statistics import mean
 
 thresh = 127
 contrast = 5.0
@@ -12,11 +9,19 @@ brightness = 1.5
 
 
 def noise(image):
+    img_bw = 255 * (image > 5).astype('uint8')
+    se1 = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))
+    se2 = cv2.getStructuringElement(cv2.MORPH_RECT, (2, 2))
+    mask = cv2.morphologyEx(img_bw, cv2.MORPH_CLOSE, se1)
+    mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, se2)
 
-    kernel = np.ones((2, 2), np.uint8)
-    image = cv2.erode(image, kernel, iterations=1)
-    image=cv2.dilate(image,kernel,iterations=1)
+    out = image * mask
 
+    return out
+
+
+def invert(image):
+    image = 255 - image
     return image
 
 
@@ -34,12 +39,12 @@ def graying(image):
 
     imageArray = np.array(imageArray)
 
-    image = cv2.cvtColor(imageArray, cv2.COLOR_BGR2GRAY)
+    image = cv2.cvtColor(imageArray, cv2.COLOR_BGR2YUV)
 
     img = Image.fromarray(image)
 
-    grayEnhancer = ImageEnhance.Color(img)
-    image = grayEnhancer.enhance(0.0)
+    # grayEnhancer = ImageEnhance.Color(img)
+    # image = grayEnhancer.enhance(0.0)
 
     imageArray = np.array(imageArray)
 
@@ -49,14 +54,12 @@ def graying(image):
 
 
 def binary(img):
-    image = cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 111, 5)
-
-    (r,c)=img.shape
-    for i in range(r):
-        for j in range(c):
-            if img[i][j] > thresh:
-                img[i][j] = 255
-            else:
-                img[i][j] = 0
-
+    image = cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 151, 10)
     return image
+
+
+def textarea(image):
+    kernel = cv2.getStructuringElement(cv2.MORPH_CROSS, (3, 3))
+    dilated = cv2.dilate(image, kernel, iterations=8)
+    img, contours, hierarchy = cv2.findContours(dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    return contours
